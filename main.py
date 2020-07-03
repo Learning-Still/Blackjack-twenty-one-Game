@@ -1,3 +1,4 @@
+# Original Code by Learning-Still 3/7/2020
 import functions
 from hand import Hand
 import graphics
