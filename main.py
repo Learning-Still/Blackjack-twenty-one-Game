@@ -97,6 +97,7 @@ while True:
             if playerMove == "twist":
                 playerXpos = functions.deal_Card(playerHand, playerXpos, PLAYER_Y_POS)
                 playerTotal = functions.get_total(playerHand)
+                playerMove = ""
 
                 # Check for ace - change to 1 if bust
                 functions.ace_swap(playerHand, playerTotal)
@@ -106,9 +107,13 @@ while True:
                 graphics.displayText(playerTotal, playerXpos, PLAYER_TOTAL_Y)
                 pygame.display.update()
                 time.sleep(1.5)
+                
+                
 
             elif playerMove == "stick":
                 turn = "comp"
+             
+            
 
 
         if turn == compHand.get_user():
