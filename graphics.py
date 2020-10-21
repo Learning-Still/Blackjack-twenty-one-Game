@@ -16,9 +16,9 @@ basicFont = pygame.font.SysFont(None, 20)
 # Dictionary of x co-ords for eeach spot for each card
 
 # set up window
-def window():
-    WINDOWWIDTH = 804
-    WINDOWHEIGHT = 402
+def window(WINDOWWIDTH, WINDOWHEIGHT):
+    WINDOWWIDTH = WINDOWWIDTH
+    WINDOWHEIGHT = WINDOWHEIGHT
     # lets other functions in this file use windowSurface
     global windowSurface
     windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)

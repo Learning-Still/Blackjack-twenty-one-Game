@@ -7,9 +7,12 @@ from pygame.locals import *
 import sys
 import time
 
+WINDOWWIDTH = 804
+WINDOWHEIGHT = 402
+
 rules = ""
 # Start Game
-graphics.window()
+graphics.window(WINDOWWIDTH, WINDOWHEIGHT)
 # Ask if they want to see rules
 graphics.displayText("*** BLACKJACK  ***", 400, 0)
 
@@ -27,7 +30,7 @@ while rules != "Y" and rules != "N":
 
 #if y is pressed rules displayed. New graphics window set up blank screen and timer keeps it open
 if rules == "Y":
-    graphics.window()
+    graphics.window(WINDOWWIDTH, WINDOWHEIGHT)
     graphics.displayText(" Both you and the computer are dealt 2 cards. ", 5,5)
     graphics.displayText("However, you can only see one of the computer's cards.",5, 25)
     graphics.displayText("All cards are face value except:", 5, 45)
@@ -47,6 +50,7 @@ while True:
     # Uses Hand class to make a hand for the player and a hand for the computer.
     playerHand = Hand("player")
     compHand = Hand("comp")
+    player2hand = Hand("player2")
 
     # card positions
     playerXpos = 5
@@ -56,15 +60,17 @@ while True:
     PLAYER_TOTAL_Y = 185
     COMP_TOTAL_Y = 13
     # reset window
-    graphics.window()
+    graphics.window(WINDOWWIDTH, WINDOWHEIGHT)
 
     # indicate where each players hand is
     graphics.displayText("Player:", 5, PLAYER_Y_POS - 15)
     graphics.displayText("Computer:", 5, COMP_Y_POS - 15)
     # picks two cards for each hand
     for card in range(2):
-        playerXpos = functions.deal_Card(playerHand, playerXpos, PLAYER_Y_POS)
-        compXpos = functions.deal_Card(compHand, compXpos, COMP_Y_POS)
+        functions.deal_Card(playerHand)
+        playerXpos = functions.draw(playerXpos, PLAYER_Y_POS, playerHand)
+        functions.deal_Card(compHand)
+        compXpos = functions.draw(compXpos, COMP_Y_POS,compHand)
     # only one of the comps cards can be shown- rect covers it up
     graphics.coverUp(compXpos, COMP_Y_POS)
 
@@ -72,6 +78,7 @@ while True:
     #gets and displays the total of each hand
     compTotal =str(functions.get_total(compHand))
     playerTotal =str(functions.get_total(playerHand))
+    player2Total = str(functions.get_total(player2hand))
 
     graphics.displayText(playerTotal, playerXpos, PLAYER_TOTAL_Y)
 
@@ -80,45 +87,97 @@ while True:
     #Players turn is first
     turn = "player"
     playerMove = ""
+    player2Move = ""
 
+    playerCards = playerHand.get_card_faces()
+    firstCard = playerCards[0]
+    secondCard = playerCards[1]
 
             #Player picks move. if t pressed, new card added until either total is over 21 or s is  pressed
-    while playerMove != "stick" and (int(playerTotal) <= 21 and int(compTotal) <= 21):
+    while player2Move != "stick" and int(compTotal) <= 21:
         if turn == playerHand.get_user():
+            
             for event in pygame.event.get():
                 if event.type == KEYUP:
                     if event.key == K_t:
                         playerMove = "twist"
                     elif event.key == K_s:
                         playerMove = "stick"
+                    elif event.key == K_2:
+                        if len(playerCards) == 2 and firstCard[0] == secondCard[0]:
+                            playerMove = "split cards"
+                            firstCard= "XX"
+                            secondCard= "YY"
 
 
 
             if playerMove == "twist":
-                playerXpos = functions.deal_Card(playerHand, playerXpos, PLAYER_Y_POS)
                 playerTotal = functions.get_total(playerHand)
-                playerMove = ""
+                if playerTotal < 21:
+                    playerXpos, playerMove, playerTotal = functions.playerGo(playerHand, playerXpos, PLAYER_Y_POS, PLAYER_TOTAL_Y)
+                    if playerTotal >= 21:
+                        turn = "player2"
+                else:
+                    playerMove = "stick"
 
-                # Check for ace - change to 1 if bust
-                functions.ace_swap(playerHand, playerTotal)
+            elif playerMove == "stick":
+                turn = "player2"
 
-                #Displays new total
+            elif playerMove == "split cards":
+                # extend screen
+                #add another playable hand
+                WINDOWWIDTH = WINDOWWIDTH*2
+                cardFace, cardValue  = playerHand.remove_last_card()
+                player2hand.add_card_face(cardFace)
+                player2hand.add_card_value(cardValue)
+
+                playerXpos, player2Xpos, compXpos = functions.redoBoard(WINDOWWIDTH, WINDOWHEIGHT, PLAYER_Y_POS, COMP_Y_POS, playerHand, player2hand, compHand)
+                graphics.displayText("Player:", 5, PLAYER_Y_POS - 15)
+                graphics.displayText("Computer:", 5, COMP_Y_POS - 15)
+
                 playerTotal = str(functions.get_total(playerHand))
                 graphics.displayText(playerTotal, playerXpos, PLAYER_TOTAL_Y)
                 pygame.display.update()
-                time.sleep(1.5)
-                
-                
 
-            elif playerMove == "stick":
+                player2Total = str(functions.get_total(player2hand))
+                graphics.displayText(player2Total, player2Xpos, PLAYER_TOTAL_Y)
+                pygame.display.update()
+
+                compTotal = str(functions.get_total(playerHand))
+                graphics.displayText(compTotal, compXpos, COMP_TOTAL_Y)
+                pygame.display.update()
+
+                playerMove = ""
+
+        if turn == player2hand.get_user():
+            cardlist = player2hand.get_card_values()
+            if len(cardlist) != 0:
+                for event in pygame.event.get():
+                    if event.type == KEYUP:
+                        if event.key == K_t:
+                            player2Move = "twist"
+                        elif event.key == K_s:
+                            player2Move = "stick"
+
+                player2Total = functions.get_total(player2hand)
+
+                if player2Move == "twist":
+                    if player2Total < 21:
+                        player2Xpos, player2Move, player2Total = functions.playerGo(player2hand, player2Xpos, PLAYER_Y_POS, PLAYER_TOTAL_Y)
+                        if player2Total >= 21:
+                            turn = "comp"
+                    else:
+                        player2Move = "stick"
+                elif player2Move == "stick":
+                    turn = "comp"
+            else:
+                player2Move = "stick"
                 turn = "comp"
-             
-            
 
 
         if turn == compHand.get_user():
             #Redraws second card
-            graphics.draw_card(compXpos-72, COMP_Y_POS, compHand.get_card_faces()[1])
+            functions.draw(compXpos-72, COMP_Y_POS, compHand)
             #comp move
             compXpos = functions.comp_move(compHand, compXpos, COMP_Y_POS)
             #Displays comps new total
@@ -130,25 +189,74 @@ while True:
 
 
     #Determine if anyone busts, and who wins.
-    graphics.window()
+    if WINDOWWIDTH != 804:
+        WINDOWWIDTH = WINDOWWIDTH//2
+
+    graphics.window(WINDOWWIDTH, WINDOWHEIGHT)
     # last total were strings - int needed for calculations
-    playerTotal = int(playerTotal)
-    compTotal = int(compTotal)
+    playerTotal = functions.get_total(playerHand)
+    compTotal = functions.get_total(compHand)
+    player2Total = functions.get_total(player2hand)
+
+
 
     if playerTotal > 21:
-        graphics.displayText("You bust! You lost.", 200, 200)
+        if player2Total != 0:
+            if player2Total > 21:
+                graphics.displayText("Both hands bust! You lost.", 200, 200)
+            elif player2Total == compTotal:
+                graphics.displayText("Your first hand bust, your second hand drew with the computer", 200, 200)
+            elif player2Total < compTotal:
+                graphics.displayText("Your first hand bust and the computer beat your second hand", 200,200)
+            elif player2Total > compTotal:
+                graphics.displayText("Your first hand bust but your second hand beat the computer", 200,200)
+        else:
+            graphics.displayText("You bust! you lost.", 200,200)
+
 
     elif compTotal > 21:
         graphics.displayText("Comp bust! You won!", 200, 200)
 
     elif playerTotal == compTotal:
-        graphics.displayText("You both have the same scores. It's a tie!", 200, 200)
+        if player2Total != 0:
+            if player2Total > 21:
+                graphics.displayText("Your first hand drew, your second hand bust.", 200, 200)
+            elif player2Total == compTotal:
+                graphics.displayText("Both hands drew", 200, 200)
+            elif player2Total < compTotal:
+                graphics.displayText("Your first hand drew and the computer beat your second hand", 200,200)
+            elif player2Total > compTotal:
+                graphics.displayText("Your first hand drew, your second hand beat the computer",200,200)
+        else:
+            graphics.displayText("You drew", 200,200)
 
     elif playerTotal > compTotal:
-        graphics.displayText("You are closer to 21 then the computer. You won!", 200, 200)
+        if player2Total != 0 :
+            if player2Total > 21:
+                graphics.displayText("Your first hand beat the computer but your second hand bust",200,200)
+            elif player2Total == compTotal:
+                graphics.displayText("Your first hand beat the computer, the other drew",200,200)
+            elif player2Total < compTotal:
+                graphics.displayText("Your first hand beat the computer, the second hand lost",200,200)
+            elif player2Total > compTotal:
+                graphics.displayText("Both hands are closer to 21 then the computer. You won!", 200, 200)
+        else:
+            graphics.displayText("You won!", 200,200)
 
-    else:
-        graphics.displayText("The computer was closer to 21. You lost.", 200, 200)
+    elif playerTotal < compTotal:
+        if player2Total != 0:
+            if player2Total > 21:
+                graphics.displayText("Your first hand lost and your second hand bust",200,200)
+            elif player2Total == compTotal:
+                graphics.displayText("Your first hand lost, the other drew",200,200)
+            elif player2Total < compTotal:
+                graphics.displayText("both hands lost",200,200)
+            elif player2Total > compTotal:
+                graphics.displayText("Your first hand lost, the second hand won", 200, 200)
+        else:
+            graphics.displayText("You lost.", 200,200)
+
+
 
     pygame.display.update()
     time.sleep(3)
