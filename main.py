@@ -37,9 +37,10 @@ if rules == "Y":
     graphics.displayText("Jack (J), Queen (Q) and King (K) are all worth 10.", 10, 65)
     graphics.displayText("Ace (A) can be worth 11 or 1.", 10, 85)
     graphics.displayText("The aim of the game is to get closer to 21 points than the computer without going over (busting).", 5, 105)
-    graphics.displayText("You can twist ( press t) to get another card (so you have three) or stick ( press s) to stay with the cards you have", 5, 125)
-    graphics.displayText("You go first.", 5, 145)
-    graphics.displayText("Have fun and good luck!", 5, 165)
+    graphics.displayText("You can twist ( press t) to get another card (so you have three) or stick ( press s) to stay with the cards you have.", 5, 125)
+    graphics.displayText("If you are dealt with two card with the same face (e.g: two queens), you can press 2 to play two hands.", 5, 145)
+    graphics.displayText("You go first.", 5, 165)
+    graphics.displayText("Have fun and good luck!", 5, 185)
 
     pygame.display.update()
     time.sleep(15)
@@ -69,19 +70,19 @@ while True:
     for card in range(2):
         functions.deal_Card(playerHand)
         playerXpos = functions.draw(playerXpos, PLAYER_Y_POS, playerHand)
-        functions.deal_Card(compHand)
-        compXpos = functions.draw(compXpos, COMP_Y_POS,compHand)
-    # only one of the comps cards can be shown- rect covers it up
-    graphics.coverUp(compXpos, COMP_Y_POS)
+
+    functions.deal_Card(compHand)
+    compXpos = functions.draw(compXpos, COMP_Y_POS,compHand)
 
 
-    #gets and displays the total of each hand
+
+    #gets and displays the total of player hand and comphand
     compTotal =str(functions.get_total(compHand))
     playerTotal =str(functions.get_total(playerHand))
     player2Total = str(functions.get_total(player2hand))
 
     graphics.displayText(playerTotal, playerXpos, PLAYER_TOTAL_Y)
-
+    graphics.displayText(compTotal, compXpos, COMP_TOTAL_Y)
     pygame.display.update()
 
     #Players turn is first
@@ -89,11 +90,12 @@ while True:
     playerMove = ""
     player2Move = ""
 
+    # gets first 2 cards to check if you can split them
     playerCards = playerHand.get_card_faces()
     firstCard = playerCards[0]
     secondCard = playerCards[1]
 
-            #Player picks move. if t pressed, new card added until either total is over 21 or s is  pressed
+            #Player picks move. if t pressed, new card added until either total is over 21 or s is  pressed. 2 pressed splits into 2 new hands
     while player2Move != "stick" and int(compTotal) <= 21:
         if turn == playerHand.get_user():
             
@@ -106,6 +108,7 @@ while True:
                     elif event.key == K_2:
                         if len(playerCards) == 2 and firstCard[0] == secondCard[0]:
                             playerMove = "split cards"
+                            # renames cards so won't allow split again
                             firstCard= "XX"
                             secondCard= "YY"
 
@@ -127,10 +130,11 @@ while True:
                 # extend screen
                 #add another playable hand
                 WINDOWWIDTH = WINDOWWIDTH*2
-                cardFace, cardValue  = playerHand.remove_last_card()
+                cardFace, cardValue = playerHand.remove_last_card()
                 player2hand.add_card_face(cardFace)
                 player2hand.add_card_value(cardValue)
 
+                #redraw board
                 playerXpos, player2Xpos, compXpos = functions.redoBoard(WINDOWWIDTH, WINDOWHEIGHT, PLAYER_Y_POS, COMP_Y_POS, playerHand, player2hand, compHand)
                 graphics.displayText("Player:", 5, PLAYER_Y_POS - 15)
                 graphics.displayText("Computer:", 5, COMP_Y_POS - 15)
@@ -144,11 +148,11 @@ while True:
                 pygame.display.update()
 
                 compTotal = str(functions.get_total(playerHand))
-                graphics.displayText(compTotal, compXpos, COMP_TOTAL_Y)
+                #graphics.displayText(compTotal, compXpos, COMP_TOTAL_Y)
                 pygame.display.update()
 
                 playerMove = ""
-
+        #repeat with player's second hand
         if turn == player2hand.get_user():
             cardlist = player2hand.get_card_values()
             if len(cardlist) != 0:
@@ -176,8 +180,6 @@ while True:
 
 
         if turn == compHand.get_user():
-            #Redraws second card
-            functions.draw(compXpos-72, COMP_Y_POS, compHand)
             #comp move
             compXpos = functions.comp_move(compHand, compXpos, COMP_Y_POS)
             #Displays comps new total
@@ -188,7 +190,7 @@ while True:
 
 
 
-    #Determine if anyone busts, and who wins.
+    #reduce screen size if extended - reset for next game
     if WINDOWWIDTH != 804:
         WINDOWWIDTH = WINDOWWIDTH//2
 
@@ -198,7 +200,7 @@ while True:
     compTotal = functions.get_total(compHand)
     player2Total = functions.get_total(player2hand)
 
-
+# checks and displays the results of each hand compared to the computer
 
     if playerTotal > 21:
         if player2Total != 0:

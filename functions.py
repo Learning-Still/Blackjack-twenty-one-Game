@@ -77,6 +77,7 @@ def ace_swap(UserHand, total):
             cards[Aindex] = 1
             UserHand.set_card_values(cards)
 
+#returs last card in list
 def nextCard(userHand):
     cardList = userHand.get_card_faces()
     length = len(cardList)
@@ -84,6 +85,7 @@ def nextCard(userHand):
 
     return card
 
+#resets whole board and returns new positions
 def redoBoard(WINDOWWIDTH, WINDOWHEIGHT, playerYpos, compYpos, playerHand, player2hand, compHand):
     compCards = compHand.get_card_faces()
     playerCards = playerHand.get_card_faces()
@@ -112,6 +114,7 @@ def redoBoard(WINDOWWIDTH, WINDOWHEIGHT, playerYpos, compYpos, playerHand, playe
 
     return playerXpos, player2Xpos, compXpos
 
+#player interaction
 def playerGo(playerHand, playerXpos, PLAYER_Y_POS, PLAYER_TOTAL_Y):
     deal_Card(playerHand)
     playerXpos = draw(playerXpos, PLAYER_Y_POS, playerHand)

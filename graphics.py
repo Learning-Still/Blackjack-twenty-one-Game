@@ -36,7 +36,7 @@ def draw_card(x, y, cardFace):
     CARD_HEIGHT = 93.8
     cardRect = pygame.draw.rect(windowSurface, WHITE, (x, y, CARD_WIDTH, CARD_HEIGHT))
     # gets the number/letter and the suit of the card
-    digit= cardFace[:1]
+    digit = cardFace[:1]
     if digit == "1":
         digit = cardFace[:2]
     suit = cardFace[-1:]
