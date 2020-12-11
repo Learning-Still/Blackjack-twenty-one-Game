@@ -21,3 +21,8 @@ class Hand():
 
     def get_card_faces(self):
         return self.cardFaces
+
+    def remove_last_card(self):
+        cardFace = self.cardFaces.pop()
+        cardValue = self.cardValues.pop()
+        return cardFace, cardValue

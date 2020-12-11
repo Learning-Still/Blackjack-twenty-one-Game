@@ -16,9 +16,9 @@ basicFont = pygame.font.SysFont(None, 20)
 # Dictionary of x co-ords for eeach spot for each card
 
 # set up window
-def window():
-    WINDOWWIDTH = 804
-    WINDOWHEIGHT = 402
+def window(WINDOWWIDTH, WINDOWHEIGHT):
+    WINDOWWIDTH = WINDOWWIDTH
+    WINDOWHEIGHT = WINDOWHEIGHT
     # lets other functions in this file use windowSurface
     global windowSurface
     windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
@@ -36,7 +36,7 @@ def draw_card(x, y, cardFace):
     CARD_HEIGHT = 93.8
     cardRect = pygame.draw.rect(windowSurface, WHITE, (x, y, CARD_WIDTH, CARD_HEIGHT))
     # gets the number/letter and the suit of the card
-    digit= cardFace[:1]
+    digit = cardFace[:1]
     if digit == "1":
         digit = cardFace[:2]
     suit = cardFace[-1:]
