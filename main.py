@@ -147,9 +147,6 @@ while True:
                 graphics.displayText(player2Total, player2Xpos, PLAYER_TOTAL_Y)
                 pygame.display.update()
 
-                compTotal = str(functions.get_total(playerHand))
-                #graphics.displayText(compTotal, compXpos, COMP_TOTAL_Y)
-                pygame.display.update()
 
                 playerMove = ""
         #repeat with player's second hand
